@@ -50,7 +50,7 @@ A full-stack recipe management and meal planning application that helps users or
 
 
 ### Recipe Dashboard
-![Recipes](screenshot-recipes.png)
+![Recipes][(screenshot-recipes.png)](https://github.com/OtsileLeballo/recipe-meal-planner/blob/main/recipe%20dashboard.PNG)
 
 ### Meal Planner
 ![Meal Planner](screenshot-planner.png)
