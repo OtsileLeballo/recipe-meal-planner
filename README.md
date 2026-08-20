@@ -53,7 +53,7 @@ A full-stack recipe management and meal planning application that helps users or
 ![Recipes][(screenshot-recipes.png)](https://github.com/OtsileLeballo/recipe-meal-planner/blob/main/recipe%20dashboard.PNG)
 
 ### Meal Planner
-![Meal Planner](screenshot-planner.png)
+![Meal Planner][(screenshot-planner.png)](https://github.com/OtsileLeballo/recipe-meal-planner/blob/main/meal%20planner.PNG)
 
 ### Shopping List
 ![Shopping List](screenshot-shopping.png)
