@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe & Meal Planner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f0eb;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        /* Auth */
+        .auth-container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .auth-container h1 { text-align: center; font-size: 2rem; color: #e67e22; }
+        .auth-container .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 30px; }
+        .auth-container input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .auth-container input:focus { border-color: #e67e22; outline: none; }
+        .auth-container button {
+            width: 100%;
+            padding: 12px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-container button:hover { background: #d35400; }
+        .toggle-link { text-align: center; margin-top: 15px; color: #e67e22; cursor: pointer; }
+        .error { color: #e74c3c; margin-top: 10px; text-align: center; }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        header h1 { font-size: 1.5rem; color: #e67e22; }
+        header .subtitle { font-size: 13px; color: #888; }
+        .user-name { color: #e67e22; font-weight: 500; margin-right: 15px; }
+        .btn-logout {
+            padding: 8px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-logout:hover { background: #c0392b; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 12px;
+        }
+        .tab {
+            padding: 10px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #888;
+            border-radius: 6px;
+        }
+        .tab:hover { background: #f0f0f0; }
+        .tab.active { color: #e67e22; background: #fde8d0; }
+
+        /* Add Recipe */
+        .add-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .add-section h3 { margin-bottom: 16px; color: #2c3e50; }
+        .recipe-form {
+            display: grid;
+            gap: 12px;
+        }
+        .recipe-form input, .recipe-form textarea {
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .recipe-form input:focus, .recipe-form textarea:focus {
+            border-color: #e67e22;
+            outline: none;
+        }
+        .recipe-form textarea { resize: vertical; }
+        .btn-add {
+            padding: 12px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .btn-add:hover { background: #d35400; }
+
+        /* Search */
+        .search-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .search-section input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .search-section input:focus { border-color: #e67e22; outline: none; }
+        .search-section select {
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        /* Recipe Grid */
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .recipe-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #e67e22;
+        }
+        .recipe-card .recipe-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+        .recipe-card .recipe-category { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .recipe-card .recipe-ingredients { font-size: 14px; color: #555; margin-bottom: 8px; }
+        .recipe-card .recipe-instructions { font-size: 14px; color: #666; line-height: 1.5; }
+        .recipe-card .recipe-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .recipe-card .recipe-actions button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-edit-recipe { background: #f39c12; color: white; }
+        .btn-edit-recipe:hover { background: #e67e22; }
+        .btn-delete-recipe { background: #e74c3c; color: white; }
+        .btn-delete-recipe:hover { background: #c0392b; }
+        .btn-plan-recipe { background: #2ecc71; color: white; }
+        .btn-plan-recipe:hover { background: #27ae60; }
+
+        .empty-state { text-align: center; padding: 40px 0; color: #999; }
+
+        /* Meal Planner */
+        .planner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-shopping {
+            padding: 10px 24px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-shopping:hover { background: #27ae60; }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+        .day-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-height: 120px;
+        }
+        .day-card h4 { color: #2c3e50; margin-bottom: 10px; font-size: 14px; }
+        .day-card select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+        }
+        .day-card select:focus { border-color: #e67e22; outline: none; }
+
+        /* Shopping List */
+        .shopping-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-clear {
+            padding: 8px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-clear:hover { background: #c0392b; }
+        .btn-export {
+            padding: 8px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-export:hover { background: #2980b9; }
+
+        .shopping-list {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .shopping-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .shopping-item:last-child { border-bottom: none; }
+        .shopping-item .item-name { font-size: 15px; }
+        .shopping-item .item-check {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #e67e22;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            z-index: 999;
+            animation: slideIn 0.3s ease;
+        }
+        .toast-success { background: #2ecc71; }
+        .toast-error { background: #e74c3c; }
+        .toast-info { background: #3498db; }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 992px) {
+            .week-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; flex-direction: column; align-items: flex-start; }
+            .week-grid { grid-template-columns: repeat(2, 1fr); }
+            .recipe-grid { grid-template-columns: 1fr; }
+            .tabs { flex-wrap: wrap; }
+        }
+        @media (max-width: 480px) {
+            .week-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH SECTION -->
+    <div id="authSection">
+        <div class="auth-container">
+            <h1>🍳 Recipe & Meal Planner</h1>
+            <p class="subtitle">Plan your meals, save recipes, generate shopping lists</p>
+
+            <div id="loginForm">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button onclick="login()">🔓 Login</button>
+                <p class="toggle-link" onclick="showRegister()">Don't have an account? Register</p>
+                <div id="loginError" class="error"></div>
+            </div>
+
+            <div id="registerForm" style="display:none;">
+                <h2>Register</h2>
+                <input type="text" id="registerName" placeholder="Full Name">
+                <input type="email" id="registerEmail" placeholder="Email">
+                <input type="password" id="registerPassword" placeholder="Password (min 6 chars)">
+                <button onclick="register()">🔐 Create Account</button>
+                <p class="toggle-link" onclick="showLogin()">Already have an account? Login</p>
+                <div id="registerError" class="error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboardSection" style="display:none;">
+        <header>
+            <div>
+                <h1>🍳 Recipe & Meal Planner</h1>
+                <span class="subtitle">Plan your meals for the week</span>
+            </div>
+            <div>
+                <span id="userName" class="user-name"></span>
+                <button onclick="logout()" class="btn-logout">🚪 Logout</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('recipes')">📋 Recipes</button>
+                <button class="tab" onclick="switchTab('planner')">📅 Meal Planner</button>
+                <button class="tab" onclick="switchTab('shopping')">🛒 Shopping List</button>
+            </div>
+
+            <!-- RECIPES TAB -->
+            <div id="recipesTab" class="tab-content">
+                <div class="add-section">
+                    <h3>➕ Add New Recipe</h3>
+                    <div class="recipe-form">
+                        <input type="text" id="recipeName" placeholder="Recipe Name">
+                        <input type="text" id="recipeCategory" placeholder="Category (e.g., Dinner, Breakfast)">
+                        <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)">
+                        <textarea id="recipeInstructions" placeholder="Instructions" rows="3"></textarea>
+                        <button onclick="addRecipe()" class="btn-add">💾 Save Recipe</button>
+                    </div>
+                    <div id="recipeError" class="error"></div>
+                </div>
+
+                <div class="search-section">
+                    <input type="text" id="searchRecipes" placeholder="🔍 Search recipes..." onkeyup="searchRecipes()">
+                    <select id="filterCategory" onchange="filterRecipes()">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
+
+                <div id="recipeList" class="recipe-grid"></div>
+            </div>
+
+            <!-- MEAL PLANNER TAB -->
+            <div id="plannerTab" class="tab-content" style="display:none;">
+                <div class="planner-header">
+                    <h3>📅 Weekly Meal Plan</h3>
+                    <button onclick="generateShoppingList()" class="btn-shopping">🛒 Generate Shopping List</button>
+                </div>
+
+                <div class="week-grid">
+                    <div class="day-card" data-day="Monday">
+                        <h4>Monday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Monday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Tuesday">
+                        <h4>Tuesday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Tuesday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Wednesday">
+                        <h4>Wednesday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Wednesday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Thursday">
+                        <h4>Thursday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Thursday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Friday">
+                        <h4>Friday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Friday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Saturday">
+                        <h4>Saturday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Saturday', this.value)"></select>
+                    </div>
+                    <div class="day-card" data-day="Sunday">
+                        <h4>Sunday</h4>
+                        <select class="meal-select" onchange="updateMealPlan('Sunday', this.value)"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHOPPING LIST TAB -->
+            <div id="shoppingTab" class="tab-content" style="display:none;">
+                <div class="shopping-header">
+                    <h3>🛒 Shopping List</h3>
+                    <div>
+                        <button onclick="clearShoppingList()" class="btn-clear">🗑️ Clear List</button>
+                        <button onclick="exportShoppingList()" class="btn-export">📤 Export as Text</button>
+                    </div>
+                </div>
+                <div id="shoppingList" class="shopping-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ DATABASE (localStorage) ============
+        const DB = {
+            getUsers() {
+                return JSON.parse(localStorage.getItem('recipe_users') || '[]');
+            },
+            setUsers(users) {
+                localStorage.setItem('recipe_users', JSON.stringify(users));
+            },
+            getRecipes() {
+                return JSON.parse(localStorage.getItem('recipe_recipes') || '[]');
+            },
+            setRecipes(recipes) {
+                localStorage.setItem('recipe_recipes', JSON.stringify(recipes));
+            },
+            getMealPlan() {
+                return JSON.parse(localStorage.getItem('recipe_mealplan') || '{}');
+            },
+            setMealPlan(plan) {
+                localStorage.setItem('recipe_mealplan', JSON.stringify(plan));
+            },
+            getSession() {
+                return JSON.parse(localStorage.getItem('recipe_session') || 'null');
+            },
+            setSession(session) {
+                localStorage.setItem('recipe_session', JSON.stringify(session));
+            },
+            clearSession() {
+                localStorage.removeItem('recipe_session');
+            }
+        };
+
+        // ============ HELPERS ============
+        let currentUser = null;
+        let currentTab = 'recipes';
+
+        function generateId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function clearErrors() {
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
+            document.getElementById('recipeError').textContent = '';
+        }
+
+        // ============ AUTH ============
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            clearErrors();
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            clearErrors();
+        }
+
+        function register() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+
+            if (!name || !email || !password) {
+                document.getElementById('registerError').textContent = 'All fields required';
+                return;
+            }
+
+            if (password.length < 6) {
+                document.getElementById('registerError').textContent = 'Password must be at least 6 characters';
+                return;
+            }
+
+            const users = DB.getUsers();
+            if (users.find(u => u.email === email)) {
+                document.getElementById('registerError').textContent = 'Email already registered';
+                return;
+            }
+
+            const user = {
+                id: generateId(),
+                name,
+                email,
+                password: hashPassword(password),
+                created_at: new Date().toISOString()
+            };
+
+            users.push(user);
+            DB.setUsers(users);
+
+            const session = { userId: user.id };
+            DB.setSession(session);
+            currentUser = user;
+
+            showToast('Account created!');
+            showDashboard();
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                document.getElementById('loginError').textContent = 'Email and password required';
+                return;
+            }
+
+            const users = DB.getUsers();
+            const user = users.find(u => u.email === email);
+
+            if (!user || user.password !== hashPassword(password)) {
+                document.getElementById('loginError').textContent = 'Invalid credentials';
+                return;
+            }
+
+            const session = { userId: user.id };
+            DB.setSession(session);
+            currentUser = user;
+
+            showToast('Welcome back!');
+            showDashboard();
+        }
+
+        function logout() {
+            DB.clearSession();
+            currentUser = null;
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('authSection').style.display = 'block';
+            showToast('Logged out');
+        }
+
+        // ============ DASHBOARD ============
+        function showDashboard() {
+            const session = DB.getSession();
+            if (!session) {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('dashboardSection').style.display = 'none';
+                return;
+            }
+
+            const users = DB.getUsers();
+            const user = users.find(u => u.id === session.userId);
+
+            if (!user) {
+                DB.clearSession();
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('dashboardSection').style.display = 'none';
+                return;
+            }
+
+            currentUser = user;
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            document.getElementById('userName').textContent = `👤 ${user.name}`;
+
+            loadRecipes();
+            loadMealPlan();
+            populateCategoryFilter();
+        }
+
+        // ============ TABS ============
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+
+            if (tab === 'recipes') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('recipesTab').style.display = 'block';
+                loadRecipes();
+            } else if (tab === 'planner') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('plannerTab').style.display = 'block';
+                loadMealPlan();
+            } else if (tab === 'shopping') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('shoppingTab').style.display = 'block';
+                loadShoppingList();
+            }
+        }
+
+        // ============ RECIPES ============
+        function getRecipes() {
+            const all = DB.getRecipes();
+            return all.filter(r => r.userId === currentUser.id);
+        }
+
+        function loadRecipes() {
+            const recipes = getRecipes();
+            renderRecipes(recipes);
+            populateCategoryFilter();
+        }
+
+        function renderRecipes(recipes) {
+            const container = document.getElementById('recipeList');
+
+            if (recipes.length === 0) {
+                container.innerHTML = '<div class="empty-state">🍳 No recipes yet. Add your first recipe!</div>';
+                return;
+            }
+
+            container.innerHTML = recipes.map(r => `
+                    <div class="recipe-card">
+                        <div class="recipe-name">${r.name}</div>
+                        <div class="recipe-category">📂 ${r.category}</div>
+                        <div class="recipe-ingredients"><strong>Ingredients:</strong> ${r.ingredients}</div>
+                        <div class="recipe-instructions"><strong>Instructions:</strong> ${r.instructions}</div>
+                        <div class="recipe-actions">
+                            <button class="btn-plan-recipe" onclick="addToMealPlan('${r.id}')">📅 Plan This</button>
+                            <button class="btn-edit-recipe" onclick="editRecipe('${r.id}')">✏️ Edit</button>
+                            <button class="btn-delete-recipe" onclick="deleteRecipe('${r.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function addRecipe() {
+            const name = document.getElementById('recipeName').value.trim();
+            const category = document.getElementById('recipeCategory').value.trim();
+            const ingredients = document.getElementById('recipeIngredients').value.trim();
+            const instructions = document.getElementById('recipeInstructions').value.trim();
+
+            if (!name || !category || !ingredients || !instructions) {
+                document.getElementById('recipeError').textContent = 'All fields required';
+                return;
+            }
+
+            const recipes = DB.getRecipes();
+            const recipe = {
+                id: generateId(),
+                userId: currentUser.id,
+                name,
+                category,
+                ingredients,
+                instructions,
+                created_at: new Date().toISOString()
+            };
+
+            recipes.push(recipe);
+            DB.setRecipes(recipes);
+
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeCategory').value = '';
+            document.getElementById('recipeIngredients').value = '';
+            document.getElementById('recipeInstructions').value = '';
+            document.getElementById('recipeError').textContent = '';
+
+            showToast('Recipe added!');
+            loadRecipes();
+            populateCategoryFilter();
+        }
+
+        function editRecipe(id) {
+            const recipes = getRecipes();
+            const recipe = recipes.find(r => r.id === id);
+            if (!recipe) return;
+
+            document.getElementById('recipeName').value = recipe.name;
+            document.getElementById('recipeCategory').value = recipe.category;
+            document.getElementById('recipeIngredients').value = recipe.ingredients;
+            document.getElementById('recipeInstructions').value = recipe.instructions;
+
+            const btn = document.querySelector('.btn-add');
+            btn.textContent = '✏️ Update Recipe';
+            btn.onclick = function() { updateRecipe(id); };
+
+            document.querySelector('.add-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateRecipe(id) {
+            const name = document.getElementById('recipeName').value.trim();
+            const category = document.getElementById('recipeCategory').value.trim();
+            const ingredients = document.getElementById('recipeIngredients').value.trim();
+            const instructions = document.getElementById('recipeInstructions').value.trim();
+
+            if (!name || !category || !ingredients || !instructions) {
+                document.getElementById('recipeError').textContent = 'All fields required';
+                return;
+            }
+
+            const recipes = DB.getRecipes();
+            const index = recipes.findIndex(r => r.id === id && r.userId === currentUser.id);
+
+            if (index === -1) {
+                showToast('Recipe not found', 'error');
+                return;
+            }
+
+            recipes[index] = { ...recipes[index], name, category, ingredients, instructions };
+            DB.setRecipes(recipes);
+
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeCategory').value = '';
+            document.getElementById('recipeIngredients').value = '';
+            document.getElementById('recipeInstructions').value = '';
+            document.getElementById('recipeError').textContent = '';
+
+            const btn = document.querySelector('.btn-add');
+            btn.textContent = '💾 Save Recipe';
+            btn.onclick = function() { addRecipe(); };
+
+            showToast('Recipe updated!');
+            loadRecipes();
+            populateCategoryFilter();
+        }
+
+        function deleteRecipe(id) {
+            if (!confirm('Delete this recipe?')) return;
+
+            const recipes = DB.getRecipes();
+            const filtered = recipes.filter(r => !(r.id === id && r.userId === currentUser.id));
+            DB.setRecipes(filtered);
+
+            showToast('Recipe deleted');
+            loadRecipes();
+            populateCategoryFilter();
+        }
+
+        function searchRecipes() {
+            const search = document.getElementById('searchRecipes').value.toLowerCase();
+            const recipes = getRecipes();
+            const filtered = recipes.filter(r =>
+                r.name.toLowerCase().includes(search) ||
+                r.category.toLowerCase().includes(search) ||
+                r.ingredients.toLowerCase().includes(search)
+            );
+            renderRecipes(filtered);
+        }
+
+        function filterRecipes() {
+            const category = document.getElementById('filterCategory').value;
+            const recipes = getRecipes();
+
+            if (category === 'all') {
+                renderRecipes(recipes);
+            } else {
+                const filtered = recipes.filter(r => r.category === category);
+                renderRecipes(filtered);
+            }
+        }
+
+        function populateCategoryFilter() {
+            const recipes = getRecipes();
+            const categories = [...new Set(recipes.map(r => r.category))];
+            const select = document.getElementById('filterCategory');
+
+            const currentValue = select.value;
+            select.innerHTML = '<option value="all">All Categories</option>';
+            categories.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                select.appendChild(option);
+            });
+            select.value = currentValue;
+        }
+
+        // ============ MEAL PLANNER ============
+        function loadMealPlan() {
+            const plan = DB.getMealPlan();
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            days.forEach(day => {
+                const select = document.querySelector(`.day-card[data-day="${day}"] select`);
+                if (!select) return;
+
+                select.innerHTML = '<option value="">Select a meal...</option>';
+
+                const recipes = getRecipes();
+                recipes.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.id;
+                    option.textContent = r.name;
+                    select.appendChild(option);
+                });
+
+                if (plan[day]) {
+                    select.value = plan[day];
+                }
+            });
+        }
+
+        function updateMealPlan(day, recipeId) {
+            const plan = DB.getMealPlan();
+            if (recipeId) {
+                plan[day] = recipeId;
+            } else {
+                delete plan[day];
+            }
+            DB.setMealPlan(plan);
+            showToast(`Meal plan for ${day} updated!`);
+        }
+
+        function addToMealPlan(recipeId) {
+            const plan = DB.getMealPlan();
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            for (const day of days) {
+                if (!plan[day]) {
+                    plan[day] = recipeId;
+                    DB.setMealPlan(plan);
+                    showToast(`Added to ${day}'s meal plan!`);
+                    switchTab('planner');
+                    loadMealPlan();
+                    return;
+                }
+            }
+
+            showToast('All days are full! Clear a day first.', 'error');
+        }
+
+        // ============ SHOPPING LIST ============
+        function generateShoppingList() {
+            const plan = DB.getMealPlan();
+            const recipes = getRecipes();
+            const shoppingItems = new Set();
+
+            Object.values(plan).forEach(recipeId => {
+                const recipe = recipes.find(r => r.id === recipeId);
+                if (recipe) {
+                    const ingredients = recipe.ingredients.split(',').map(i => i.trim());
+                    ingredients.forEach(i => {
+                        if (i) shoppingItems.add(i);
+                    });
+                }
+            });
+
+            const items = Array.from(shoppingItems);
+            localStorage.setItem('recipe_shopping', JSON.stringify(items));
+            showToast(`Generated ${items.length} shopping items!`);
+            switchTab('shopping');
+            loadShoppingList();
+        }
+
+        function loadShoppingList() {
+            const items = JSON.parse(localStorage.getItem('recipe_shopping') || '[]');
+            const container = document.getElementById('shoppingList');
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state">🛒 No items. Generate a shopping list from your meal plan!</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                    <div class="shopping-item">
+                        <span class="item-name">${item}</span>
+                        <input type="checkbox" class="item-check" onchange="toggleShoppingItem(this, '${item}')">
+                    </div>
+                `).join('');
+        }
+
+        function toggleShoppingItem(checkbox, item) {
+            if (checkbox.checked) {
+                showToast(`✅ ${item} checked off!`);
+            }
+        }
+
+        function clearShoppingList() {
+            if (!confirm('Clear all shopping items?')) return;
+            localStorage.setItem('recipe_shopping', JSON.stringify([]));
+            loadShoppingList();
+            showToast('Shopping list cleared');
+        }
+
+        function exportShoppingList() {
+            const items = JSON.parse(localStorage.getItem('recipe_shopping') || '[]');
+            if (items.length === 0) {
+                showToast('No items to export', 'error');
+                return;
+            }
+
+            const text = `🛒 Shopping List\n${'='.repeat(30)}\n\n${items.map((item, i) => `${i + 1}. ${item}`).join('\n')}`;
+            navigator.clipboard.writeText(text);
+            showToast('Shopping list copied to clipboard!');
+        }
+
+        // ============ INIT ============
+        const session = DB.getSession();
+        if (session) {
+            const users = DB.getUsers();
+            const user = users.find(u => u.id === session.userId);
+            if (user) {
+                currentUser = user;
+                showDashboard();
+            } else {
+                DB.clearSession();
+                showLogin();
+            }
+        } else {
+            showLogin();
+        }
+    </script>
+</body>
+</html>
