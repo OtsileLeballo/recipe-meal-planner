@@ -46,7 +46,7 @@ A full-stack recipe management and meal planning application that helps users or
 ## 📸 Screenshots
 
 ### Login Page
-![Login]<img width="858" height="428" alt="login page" src="https://github.com/user-attachments/assets/e7c29ba6-c904-4466-8feb-e3ba896c6588" />
+![Login][<img width="858" height="428" alt="login page" src="https://github.com/user-attachments/assets/e7c29ba6-c904-4466-8feb-e3ba896c6588" />
 
 
 ### Recipe Dashboard
